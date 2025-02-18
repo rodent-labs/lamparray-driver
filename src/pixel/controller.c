@@ -68,13 +68,32 @@ void pixel_controller_main(void *_p1, void *_p2, void *_p3)
     if (!device_is_ready(strip_0))
         application_panic(ERROR_REASON_HARDWARE, 0);
 
+    // Initialize storage
+    if ((err = storage_init(K_MSEC(CONFIG_STORAGE_TIMEOUT_MS))) < 0)
+        application_panic(ERROR_REASON_STORAGE, err);
+
     // Current controller operation mode
     enum pixel_controller_operation_mode opmode =
         PIXEL_CONTROLLER_OPERATION_MODE_AUTONOMOUS;
 
     // Structure with the LED data
     struct led_rgb pixel_data[PIXEL_NUMBER_OF_LEDS];
-    memset(pixel_data, 0, sizeof(pixel_data));
+
+    // Read pixel data from storage
+    if ((err = storage_read(
+             PIXEL_DATA_STORAGE_KEY,
+             pixel_data,
+             sizeof(pixel_data),
+             K_MSEC(CONFIG_STORAGE_TIMEOUT_MS))) < 0)
+    {
+        LOG_WRN("No 'pixel_data' available, getting defaults");
+        memset(pixel_data, 0, sizeof(pixel_data));
+    }
+
+    else
+    {
+        LOG_INF("Restored pixel_data from previous session");
+    }
 
     // Channel for recieving requests
     const struct zbus_channel *channel;
@@ -98,6 +117,19 @@ void pixel_controller_main(void *_p1, void *_p2, void *_p3)
                 // Apply color
                 pixel_data[i] = cast_to_rgb(&instruction->request.update[i]);
             }
+
+            // Write data to storage
+            err = storage_write(
+                PIXEL_DATA_STORAGE_KEY,
+                // Pixel data is static!, no problem with sizeof(pixel_data)
+                pixel_data,
+                sizeof(pixel_data),
+                K_MSEC(CONFIG_STORAGE_TIMEOUT_MS));
+
+            // Not an error
+            if (err < 0)
+                LOG_WRN("Failed to store pixel_data in flash");
+
             break;
 
         case PIXEL_CONTROLLER_REQUEST_OPERATION:

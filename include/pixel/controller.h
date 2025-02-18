@@ -13,11 +13,17 @@
 #define __PIXEL_CONTROLLER_H__
 
 #include "pixel.h"
+#include "storage/storage.h"
 
 #include <stdlib.h>
 #include <errno.h>
 
 #include <zephyr/device.h>
+
+/**
+ * @brief Key for storing pixel data
+ */
+#define PIXEL_DATA_STORAGE_KEY (storage_key_t)10U
 
 /**
  * @brief pixel_controller_main() thread stack size
@@ -59,7 +65,8 @@
 /**
  * @brief Operation mode for the controller
  */
-enum pixel_controller_operation_mode {
+enum pixel_controller_operation_mode
+{
     PIXEL_CONTROLLER_OPERATION_MODE_AUTONOMOUS,
     PIXEL_CONTROLLER_OPERATION_MODE_SLAVE,
 };

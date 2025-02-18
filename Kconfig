@@ -8,9 +8,17 @@ config HID_MODULE_LOG_LEVEL
     int "'hid' module log level"
     default LOG_DEFAULT_LEVEL
 
+config STORAGE_MODULE_LOG_LEVEL
+    int "'storage' module log level"
+    default LOG_DEFAULT_LEVEL
+
+config STORAGE_TIMEOUT_MS
+    int "Timeout for storage operations"
+    default 500
+
 config MIN_PIXEL_UPDATE_TIME
     int "Minimum pixel update time in microseconds"
-    default 150
+    default 100
     help
       "Minimum time the HID Host will acknoledge before sending another request to the same pixel"
 
