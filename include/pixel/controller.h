@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <zephyr/kernel.h>
 #include <zephyr/device.h>
 
 /**

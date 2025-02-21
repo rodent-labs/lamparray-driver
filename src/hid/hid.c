@@ -42,6 +42,9 @@ static inline void usb_status_isr(
     enum usb_dc_status_code cb_status,
     const uint8_t *params)
 {
+    int err;
+
+    // Catch status
     switch (cb_status)
     {
     // USB connection failed
@@ -59,7 +62,21 @@ static inline void usb_status_isr(
     case USB_DC_DISCONNECTED:
         [[fallthrough]];
     default:
-        // TODO: Enable autonomous mode
+        // Send request to controller
+        // Request being send to Pixel Controller
+        struct pixel_controller_request pixctrl_request = {
+            .type = PIXEL_CONTROLLER_REQUEST_UPDATE,
+            .request = {
+                .operation = PIXEL_CONTROLLER_OPERATION_MODE_AUTONOMOUS,
+            },
+        };
+        if ((err = zbus_chan_pub(
+                 &pixel_controller_zbus_channel,
+                 &pixctrl_request, K_USEC(CONFIG_MIN_PIXEL_UPDATE_TIME))) < 0)
+        {
+            LOG_ERR("usb_status_isr: zbus error (errno=%d)", err);
+            return;
+        }
         break;
     }
 }
@@ -186,10 +203,10 @@ static int get_attribute_report(
             .PositionZInMicrometers = (LAMP_BOUNDING_BOX_DEPTH * current_lamp_id),
             .LampPurposes = LAMPARRAY_PURPOSE_ACCENT,
             .UpdateLatencyInMicroseconds = CONFIG_MIN_PIXEL_UPDATE_TIME,
-            .RedLevelCount = pixel_data[current_lamp_id].red,
-            .GreenLevelCount = pixel_data[current_lamp_id].green,
-            .BlueLevelCount = pixel_data[current_lamp_id].blue,
-            .IntensityLevelCount = pixel_data[current_lamp_id].intensity,
+            .RedLevelCount = 0xFF,
+            .GreenLevelCount = 0xFF,
+            .BlueLevelCount = 0xFF,
+            .IntensityLevelCount = 0xFF,
             .IsProgrammable = 0xFF,
             .InputBinding = 0x00,
         };
@@ -588,7 +605,7 @@ static int hid_interface_init(const struct device *hid_device)
     }
 
     // Set initial pixel data
-    memset(pixel_data, 0xFF, sizeof(pixel_data));
+    memset(pixel_data, 0x00, sizeof(pixel_data));
 
     // Return sucess
     LOG_INF("hid_interface_init: interface ready");
