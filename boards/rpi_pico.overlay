@@ -22,18 +22,18 @@
 
 &flash0 {
     partitions {
-        /* Remove 4 KiB to make space for storage partition */
+        /* Remove 10 KiB to make space for storage partition */
         code_partition: partition@100 {
 			label = "code-partition";
-            // Remove 0x100 (256 bytes) from bootloader and 0x1000 (4 KiB) from storage_partition
-			reg = <0x100 (DT_SIZE_M(2) - DT_SIZE_K(10) - 0x100)>;
+            // Remove 0x100 (256 bytes) from bootloader and 0x1000 (10 KiB) from storage_partition
+			reg = <0x100 (DT_SIZE_M(2) - DT_SIZE_K(12) - 0x100)>;
 			read-only;
 		};
 
         /* Storage partition, for storing LED data (10 KiB) */
-        storage_partition: partition@1FD800 {
+        storage_partition: partition@1FD000 {
             label = "storage";
-            reg = <0x1FD800 DT_SIZE_K(10)>;
+            reg = <0x1FD000 DT_SIZE_K(12)>;
         };
     };    
 };

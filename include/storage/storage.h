@@ -40,7 +40,7 @@ typedef uint16_t storage_key_t;
  * @brief Number of sectors to use
  * @note Having 3 sectors would require more flash memory
  */
-#define SECTOR_COUNT 2U
+#define SECTOR_COUNT 3U
 
 /**
  * @brief Initialize the storage subsystem

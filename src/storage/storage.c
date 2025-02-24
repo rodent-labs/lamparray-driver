@@ -72,7 +72,19 @@ inline int storage_init(k_timeout_t timeout)
 
     // Mount the file system
     if ((err = nvs_mount(&fs)) < 0)
-        return err;
+    {
+        if ((err = nvs_clear(&fs)) < 0)
+        {
+            LOG_ERR("Cannot clear filesystem data: %d", err);
+            return err;
+        }
+
+        if ((err = nvs_mount(&fs)) < 0)
+        {
+            LOG_ERR("Filesystem mount failure: %d", err);
+            return err;
+        }
+    }
 
     // File system initialized
     fs_init = true;

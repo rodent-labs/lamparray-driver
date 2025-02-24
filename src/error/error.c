@@ -22,5 +22,4 @@ inline void application_panic(error_reason_t reason, int error_code)
 ALWAYS_INLINE void panic_handler(unsigned int reason, const struct arch_esf *esf)
 {
     LOG_PANIC();
-    sys_reboot(SYS_REBOOT_COLD);
 }
